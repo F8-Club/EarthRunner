@@ -2,11 +2,25 @@
 <widget id="nl.first8.dc.earthrunner" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>EarthRunner</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        EarthRunner SmartPhone App.
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
+    <author email="tobias.poll@first8.nl" href="http://www.first8.nl">
+        First8 Dev Club
     </author>
     <content src="index.html" />
     <access origin="*" />
+	
+	 <icon src="www/res/icon.png" width="128" height="128" density="mdpi" />
+	
+	<!-- Global preferences -->
+	<preference name="Fullscreen" value="false" /> <!-- Don't hide status bar -->
+	<preference name="Orientation" value="portrait" />
+	<preference name="BackgroundColor" value="0x003303"/>
+	
+	 
+	<!-- Android specific preferences -->
+	<preference name="KeepRunning" value="false"/> <!-- Pause execution when in background -->
+	<preference name="LoadUrlTimeoutValue" value="10000"/> <!-- URL timeout in ms (default is 20s) -->
+	<preference name="SplashScreenDelay" value="2000"/>
+	<preference name="LogLevel" value="INFO"/>	
 </widget>
