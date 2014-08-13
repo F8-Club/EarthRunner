@@ -10,7 +10,7 @@
     <content src="index.html" />
     <access origin="*" />
 	
-	 <icon src="www/res/icon.png" width="128" height="128" density="mdpi" />
+	 <icon src="img/logo.png" width="240" height="240" />
 	
 	<!-- Global preferences -->
 	<preference name="Fullscreen" value="false" /> <!-- Don't hide status bar -->
