@@ -1,1 +1,14 @@
-bla!
+<html>
+
+	<head>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="/EarthRunnerServer/js/earthrunner.js"></script>
+	</head>
+	
+	<body>
+	
+		<img id="streetviewImg" src="http://maps.googleapis.com/maps/api/streetview?size=600x400&location=51.825230,5.780242&fov=120&heading=240">
+	
+	</body>
+
+</html>
