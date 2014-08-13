@@ -11,8 +11,6 @@ document.addEventListener("deviceready", onDeviceReady, false);
 function onDeviceReady() {
 	
 	window.requestFileSystem(window.PERSISTENT, 5 * 1024 * 1024 /* 5MB */, gotFileSystem, errorHandler);
-//	window.resolveLocalFileSystemURL("file:///example.txt", onResolveSuccess, fail);
-	startWatch();
 }
 
 // Start watching the acceleration
@@ -24,7 +22,7 @@ function startWatch() {
 			frequency : 100
 	};
 
-	watchID = navigator.accelerometer.watchAcceleration(onSuccess,
+	watchID = navigator.accelerometer.watchAcceleration(readWatch,
 			errorHandler, options);
 }
 
@@ -39,30 +37,33 @@ function stopWatch() {
 
 // onSuccess: Get a snapshot of the current acceleration
 //
-function onSuccess(acceleration) {
+function readWatch(acceleration) {
 	var element = document.getElementById('accelerometer');
 	element.innerHTML = 'Acceleration X: ' + acceleration.x + '<br />'
 			+ 'Acceleration Y: ' + acceleration.y + '<br />'
 			+ 'Acceleration Z: ' + acceleration.z + '<br />' + 'Timestamp: '
 			+ acceleration.timestamp + '<br />';
+	var coords = acceleration.timestamp + ';' + acceleration.x +';' + acceleration.y +';' + acceleration.z + '\n';
+	if (acceleroWriter) {
+		acceleroWriter.write(coords);
+	}
 }
 
 function gotFileSystem(fs) {
-	var fileurl = cordova.file.externalApplicationStorageDirectory + 'accelero.txt';
-	console.log('rrrrr ' + fileurl);
-	fs.root.getFile("test.txt", {create : true, exclusive: false}, gotFileEntry, errorHandler);
+//	var fileurl = cordova.file.externalApplicationStorageDirectory + 'accelero.txt';
+	var fileurl = "TestData-" + now.getHours() + now.getMinutes() + ".txt";
+	console.log("rrrr " + fileurl);
+	var now = new Date();
+//	fs.root.getFile("TestData-" + now.getHours() + now.getMinutes() + ".txt", {create : true, exclusive: false}, gotFileEntry, errorHandler);
+	fs.root.getFile("TestData.txt", {create : true, exclusive: false}, gotFileEntry, errorHandler);
 }
 
 function gotFileEntry(fileEntry) {
-	console.log('rrrrr2 ' + fileEntry);
-    fileEntry.createWriter(gotFileWriter, errorHandler);
+	fileEntry.createWriter(gotFileWriter, errorHandler);
 }
 
 function gotFileWriter(writer) {
-	console.log('rrrrr3 ' + fileEntry);
 	acceleroWriter = writer;
-	var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
-    writer.write(blob);
 }
 
 

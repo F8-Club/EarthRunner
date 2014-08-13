@@ -30,15 +30,17 @@
     <body>
         <div class="app">
             <h1>EarthRunner TestApp</h1>
-            <div id="deviceready" class="blink">
-                <p class="event listening">Connecting to Device</p>
-                <p class="event received">Device is Ready</p>
+            <div id="deviceready">
+                	<button type="button" onclick="startWatch()">Start!</button>
+                	<button type="button" onclick="stopWatch()">Stop!</button>
+                	<button type="button" onclick="startScanner()">Camera!</button>
             </div>
-			<div id="accelerometer">Waiting for accelerometer...</div>
+			<div id="accelerometer"/>
         </div>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
 		<script type="text/javascript" src="js/pedometer.js"></script>
+		<script type="text/javascript" src="js/scanner.js"></script>
         <script type="text/javascript">
             app.initialize();
         </script>
