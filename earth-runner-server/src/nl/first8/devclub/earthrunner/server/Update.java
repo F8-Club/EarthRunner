@@ -14,26 +14,25 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
-@WebServlet(urlPatterns="*.html")
-public class StreetView extends HttpServlet {
+/**
+ * Call with GET or POST and parameter 'speed' to change speed at the server.
+ */
+@WebServlet("/update")
+public class Update extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
-	
-	@Override
-	public void init() throws ServletException {
-		Velocity.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
-		Velocity.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-		Velocity.init();
-	}
+	private static final String PARAM_SPEED = "speed";
+	private static final String PARAM_UUID = "uuid";
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-	
-		Template t = Velocity.getTemplate("streetview.vm");
-		VelocityContext context = new VelocityContext();
-		t.merge(context, resp.getWriter());
-		resp.getWriter().close();
+		doPost(req,resp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		State.setSpeed( req.getParameter(PARAM_UUID), Float.valueOf(req.getParameter(PARAM_SPEED)));
 	}
 
 }

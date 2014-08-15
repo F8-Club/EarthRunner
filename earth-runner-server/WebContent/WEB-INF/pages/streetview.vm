@@ -3,13 +3,39 @@
 	<head>
 		<script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyAqaS5Ak_IGnwWHoPjqMgq_U_tYKwKTHU0"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="/EarthRunnerServer/js/jquery.atmosphere.js"></script>
+		<script src="/EarthRunnerServer/js/atmosphere.js"></script>
+		<script src="/EarthRunnerServer/js/atmosphere.js"></script>
+		<script src="/EarthRunnerServer/js/jquery.qrcode-0.9.4.js"></script>
 		<script src="/EarthRunnerServer/js/earthrunner.js"></script>
 	</head>
 	
 	<body>
 	
-		<img id="streetviewImg" src="http://maps.googleapis.com/maps/api/streetview?size=600x400&location=51.825230,5.780242&fov=120&heading=240&key=AIzaSyAqaS5Ak_IGnwWHoPjqMgq_U_tYKwKTHU0">
+		<table>
+			<tr>
+				<td>
+					<img id="streetviewImg" src="http://maps.googleapis.com/maps/api/streetview?size=600x400&location=51.825230,5.780242&fov=120&heading=240&key=AIzaSyAqaS5Ak_IGnwWHoPjqMgq_U_tYKwKTHU0">
+				</td>
+				<td>
+				QR code for this client:
+				<div id="qrcode"></div>
+				
+				</td>
+			</tr>
+		</table>
+		
 		<p id="distance"></p>
+		
+		
+		<p>Speed pushed from server: <span id="serverSpeed"></span></p>
+
+		<p> normal walking speed: 1.4 m/s
+		</p>
+		
+		<hr>
+		
+	    <ol id="log"></ol>
 	</body>
 
 </html>
