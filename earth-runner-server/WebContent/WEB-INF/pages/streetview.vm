@@ -22,6 +22,9 @@
 				<div id="qrcode"></div>
 				
 				</td>
+				<td>
+					<div id="map_canvas" style="width:600px;height:400px;"></div>
+				</td>
 			</tr>
 		</table>
 		
