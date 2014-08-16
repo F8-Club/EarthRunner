@@ -8,6 +8,24 @@
 		<script src="/EarthRunnerServer/js/atmosphere.js"></script>
 		<script src="/EarthRunnerServer/js/jquery.qrcode-0.9.4.js"></script>
 		<script src="/EarthRunnerServer/js/earthrunner.js"></script>
+		
+		<style>
+#streetview {
+	margin-top: 400px;
+}
+#streetview img {
+	z-index:1
+}
+#streetview img.active {
+	z-index:3
+}
+
+#streetview > img {
+    margin-top: -400px;
+}
+
+</style>
+		
 	</head>
 	
 	<body>
@@ -15,7 +33,10 @@
 		<table>
 			<tr>
 				<td>
-					<img id="streetviewImg" src="http://maps.googleapis.com/maps/api/streetview?size=600x400&location=51.825230,5.780242&fov=120&heading=240&key=AIzaSyAqaS5Ak_IGnwWHoPjqMgq_U_tYKwKTHU0">
+					<div id="streetview">
+						<img id="streetviewImg1" src="http://maps.googleapis.com/maps/api/streetview?size=600x400&location=51.825230,5.780242&fov=120&heading=240&key=AIzaSyAqaS5Ak_IGnwWHoPjqMgq_U_tYKwKTHU0">
+						<img id="streetviewImg2" src="http://maps.googleapis.com/maps/api/streetview?size=600x400&location=51.825230,5.780242&fov=120&heading=240&key=AIzaSyAqaS5Ak_IGnwWHoPjqMgq_U_tYKwKTHU0">
+					</div>
 				</td>
 				<td>
 				QR code for this client:
