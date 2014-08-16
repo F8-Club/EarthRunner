@@ -51,12 +51,14 @@
 		
 		<p id="distance"></p>
 		
-		
 		<p>Speed pushed from server: <span id="serverSpeed"></span></p>
 
 		<p> normal walking speed: 1.4 m/s
 		</p>
 		
+		<hr>
+			<button id="debugBuffer">debug buffer</button>
+			<div id="debug"></div>
 		<hr>
 		
 	    <ol id="log"></ol>
