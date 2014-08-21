@@ -17,18 +17,20 @@ $(function() {
 	    
     	var coordinates = routeString.split(" ");
 	    var latlngs = [];
-	    var speed = 4; // in m/s
+	    var speed = 1; // in m/s
 	    var granularity = 4; // in frames/meter
 	    
 	    var bufferTimeout = 50; // time to wait before starting buffer after being full
-	    var refreshTimeout = 200; // refresh timeout
-	    var maxBufferSize = 150; // max frames to prefetch
+	    var refreshTimeout = 300; // refresh timeout
+	    var imageCrossfade = 200; // refresh timeout
+
+	    var maxBufferSize = 50; // max frames to prefetch
 	    var buffer = new Array(maxBufferSize); // ring buffer with next few frames, keep one empty
 	    var bufferStart = 0; // start of ready ring buffer frames
 	    var bufferEnd = 0;  // end of ready ring buffer frames
 	    var traveled = 0; // distance traveled in decimeters
 	    
-	    var imageToggle = true; // indicates which image is on top for crossfading
+	    var imageToggle = 0; // indicates which image is on top for crossfading
 	    
 	    var mapCanvas = document.getElementById('map_canvas');
 	    var mapOptions = {
@@ -267,21 +269,24 @@ $(function() {
 	    	bufferMarker1.setPosition(buffer[bufferStart].latlng);
 	    	bufferMarker2.setPosition(buffer[bufferEnd].latlng);
 	    	
-	    	if (imageToggle) {
-	    		imageToggle = false;
-	    	} else {
-	    		imageToggle = true;
-	    	}
+	    	var active = $("#streetviewImg" + (imageToggle));
+	    	imageToggle +=1;
+	    	if (imageToggle>2) imageToggle = 0;
+	    	var next   = $("#streetviewImg" + (imageToggle));
 	    	
-	    	var active = $("#streetviewImg" + (imageToggle?1:2));
-	    	var next   = $("#streetviewImg" + (imageToggle?2:1));
-	    	
+//	    	// current image should be on top
+//	    	active.css('z-index',3);
+//	    	// next image below that
+//    		next.css('z-index',2);
+//    		// show next image under active image
     		next.attr('src',buffer[bufferStart].image.src);
-    		next.css('z-index',2);
-    		active.fadeOut(refreshTimeout,function(){
-	    		  active.css('z-index',1).show().removeClass('active');
-	    	      next.css('z-index',3).addClass('active');
-	    	});
+//    		
+//    		// fade out active image
+//    		active.fadeOut(imageCrossfade,function(){
+//    			  // move active image to bottom
+//	    		  active.css('z-index',1);
+//	    	      next.css('z-index',3);
+//	    	});
     		
     		var r1 = "distance from prev frame: <b>" + buffer[bufferStart].distance + "</b> m ";
     		var r2 = "<br>traveled in buffer: <b>" + buffer[bufferStart].traveled + "</b> m ";
