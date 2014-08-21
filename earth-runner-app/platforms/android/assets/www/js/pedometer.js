@@ -10,7 +10,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 //
 function onDeviceReady() {
 	
-	window.requestFileSystem(window.PERSISTENT, 5 * 1024 * 1024 /* 5MB */, gotFileSystem, errorHandler);
+	
 }
 
 // Start watching the acceleration
@@ -21,6 +21,8 @@ function startWatch() {
 	var options = {
 			frequency : 100
 	};
+	
+	window.requestFileSystem(window.PERSISTENT, 5 * 1024 * 1024 /* 5MB */, gotFileSystem, errorHandler);
 
 	watchID = navigator.accelerometer.watchAcceleration(readWatch,
 			errorHandler, options);
@@ -46,16 +48,17 @@ function readWatch(acceleration) {
 	var coords = acceleration.timestamp + ';' + acceleration.x +';' + acceleration.y +';' + acceleration.z + '\n';
 	if (acceleroWriter) {
 		acceleroWriter.write(coords);
-	}
+	} 
 }
 
 function gotFileSystem(fs) {
-//	var fileurl = cordova.file.externalApplicationStorageDirectory + 'accelero.txt';
-	var fileurl = "TestData-" + now.getHours() + now.getMinutes() + ".txt";
-	console.log("rrrr " + fileurl);
-	var now = new Date();
-//	fs.root.getFile("TestData-" + now.getHours() + now.getMinutes() + ".txt", {create : true, exclusive: false}, gotFileEntry, errorHandler);
-	fs.root.getFile("TestData.txt", {create : true, exclusive: false}, gotFileEntry, errorHandler);
+	var fileName = document.getElementById('accFile').value;
+	if (fileName) {
+		fileName = fileName + ".txt";
+	} else {
+		fileName  = "TestData-" + new Date().getTime() + ".txt";
+	}
+	fs.root.getFile(fileName, {create : true, exclusive: false}, gotFileEntry, errorHandler);
 }
 
 function gotFileEntry(fileEntry) {
