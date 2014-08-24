@@ -18,10 +18,13 @@ $(function() {
     	var coordinates = routeString.split(" ");
 	    var latlngs = [];
 	    var speed = 1; // in m/s
-	    var granularity = 4; // in frames/meter
+	    var granularity = 5; // in meter/frame
+	    
+	    var defaultRefreshTime = 300;
+	    var defaultSpeed = 10;
 	    
 	    var bufferTimeout = 50; // time to wait before starting buffer after being full
-	    var refreshTimeout = 300; // refresh timeout
+	    var refreshTimeout = defaultRefreshTime; // refresh timeout
 	    var imageCrossfade = 200; // refresh timeout
 
 	    var maxBufferSize = 50; // max frames to prefetch
@@ -109,6 +112,7 @@ $(function() {
 	            var json = atmosphere.util.parseJSON(message);
 	            if (json.speed) {
 	            	$("#serverSpeed").html(json.speed);
+	            	refreshTimeout = defaultRefreshTime*defaultSpeed/json.speed;
 	            }
 	        } catch (e) {
 	            console.log('This doesn\'t look like a valid JSON: ', message);

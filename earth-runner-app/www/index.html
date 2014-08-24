@@ -31,12 +31,15 @@
         <div class="app">
             <h1>EarthRunner TestApp</h1>
             <div id="deviceready">
-            		<input id="accFile" type="text" name="accFile" />
-                	<button type="button" onclick="startWatch()">Start!</button>
-                	<button type="button" onclick="stopWatch()">Stop!</button>
-                	<button type="button" onclick="startScanner()">Camera!</button>
+<!--             		<input id="accFile" type="text" name="accFile" style="height:50px; width:200px" /> -->
+                	<button type="button" onclick="startWatch()" style="height:50px; width:100px">Start!</button>
+                	<button type="button" onclick="stopWatch()" style="height:50px; width:100px">Stop!</button>
+                	<button type="button" onclick="startScanner()" style="height:50px; width:100px">Camera!</button>
+<!--             		<input id="eSpeed" type="number" name="eSpeed" style="height:50px; width:200px" /> -->
+<!--                 	<button type="button" onclick="setSpeed()" style="height:50px; width:100px">Action!</button> -->
             </div>
-			<div id="accelerometer"/>
+            <div id="stepDiv"></div>
+			<div id="accelerometer"></div>
         </div>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
