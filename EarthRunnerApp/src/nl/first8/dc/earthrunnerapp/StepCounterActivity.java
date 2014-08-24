@@ -1,7 +1,5 @@
 package nl.first8.dc.earthrunnerapp;
 
-import java.io.Serializable;
-
 import nl.first8.dc.earthrunnerapp.StepService.LocalBinder;
 import android.app.Activity;
 import android.content.BroadcastReceiver;

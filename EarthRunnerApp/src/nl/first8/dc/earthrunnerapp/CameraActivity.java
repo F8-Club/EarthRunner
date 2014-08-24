@@ -1,9 +1,15 @@
 package nl.first8.dc.earthrunnerapp;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 public class CameraActivity extends ActionBarActivity {
 
@@ -30,5 +36,20 @@ public class CameraActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onScan(View view) {
+        IntentIntegrator scanIntent = new IntentIntegrator(this);
+        scanIntent.initiateScan();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanningResult != null) {
+            String scanContent = scanningResult.getContents();
+            String scanFormat = scanningResult.getFormatName();
+            Toast.makeText(getApplicationContext(), String.format("Type [%s], code [%s]", scanFormat, scanContent),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 }
