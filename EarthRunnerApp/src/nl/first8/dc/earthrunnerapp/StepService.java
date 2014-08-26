@@ -1,5 +1,9 @@
 package nl.first8.dc.earthrunnerapp;
 
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -7,16 +11,19 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 public class StepService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
+    private Timer timer;
+    private Random random = new Random();
+    private String uuid = "empty";
 
     @Override
     public IBinder onBind(Intent intent) {
+        uuid = intent.getExtras().getString("uuid");
         return mBinder;
     }
 
@@ -32,7 +39,8 @@ public class StepService extends Service {
     }
 
     public void step(Step step) {
-        Log.d("StepService", String.format("AccX - %s, AccY - %s, AccZ - %s", step.getX(), step.getY(), step.getZ()));
+        // Log.d("StepService", String.format("AccX - %s, AccY - %s, AccZ - %s", step.getX(), step.getY(),
+        // step.getZ()));
         Intent stepMessage = new Intent("stepUpdate");
         stepMessage.putExtra("step", step);
         sendBroadcast(stepMessage);
@@ -44,14 +52,30 @@ public class StepService extends Service {
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = (Sensor) senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(StepListener.getInstance(this), senAccelerometer,
-                SensorManager.SENSOR_DELAY_NORMAL);
+                SensorManager.SENSOR_DELAY_FASTEST);
+        timer = new Timer("stepTimer", true);
+        TimerTask task = new UpdateServerTask(this);
+        timer.scheduleAtFixedRate(task, 3000L, 1000L);
     }
 
     @Override
     public void onDestroy() {
         senSensorManager.unregisterListener(StepListener.getInstance(this), senAccelerometer);
+        timer.cancel();
         super.onDestroy();
-        
+
+    }
+
+    public float getCurrentSpeed() {
+        return random.nextFloat() * 5;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
 }

@@ -50,6 +50,10 @@ public class CameraActivity extends ActionBarActivity {
             String scanFormat = scanningResult.getFormatName();
             Toast.makeText(getApplicationContext(), String.format("Type [%s], code [%s]", scanFormat, scanContent),
                     Toast.LENGTH_LONG).show();
+            
+            Intent stepIntent = new Intent(this, StepCounterActivity.class);
+            stepIntent.putExtra("uuid", scanContent);
+            startActivity(stepIntent);
         }
     }
 }

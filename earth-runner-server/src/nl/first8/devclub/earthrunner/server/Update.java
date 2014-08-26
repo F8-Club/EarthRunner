@@ -13,20 +13,21 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet("/update")
 public class Update extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private static final String PARAM_SPEED = "speed";
-	private static final String PARAM_UUID = "uuid";
-	
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		doPost(req,resp);
-	}
+    private static final long serialVersionUID = 1L;
+    private static final String PARAM_SPEED = "speed";
+    private static final String PARAM_UUID = "uuid";
 
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		State.setSpeed( req.getParameter(PARAM_UUID), Float.valueOf(req.getParameter(PARAM_SPEED)));
-	}
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String uuid = req.getParameter(PARAM_UUID);
+        String speed = req.getParameter(PARAM_SPEED);
+        Float floatSpeed = Float.valueOf(speed);
+        State.setSpeed(uuid, floatSpeed);
+    }
 
 }

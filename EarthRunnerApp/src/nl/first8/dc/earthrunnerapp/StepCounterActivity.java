@@ -24,11 +24,14 @@ public class StepCounterActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_counter);
+        
+        String uuid = getIntent().getExtras().getString("uuid");
 
-        Intent intent = new Intent(this, StepService.class);
+        Intent stepServiceIntent = new Intent(this, StepService.class);
+        stepServiceIntent.putExtra("uuid",uuid);
         connection = new StepServiceConnection();
         updateReceiver = new StepUpdateReceiver(this);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        bindService(stepServiceIntent, connection, Context.BIND_AUTO_CREATE);
         registerReceiver(updateReceiver, new IntentFilter("stepUpdate"));
     }
 
