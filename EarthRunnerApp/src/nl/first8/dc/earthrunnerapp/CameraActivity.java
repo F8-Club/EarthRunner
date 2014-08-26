@@ -17,6 +17,8 @@ public class CameraActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        IntentIntegrator scanIntent = new IntentIntegrator(this);
+        scanIntent.initiateScan();
     }
 
     @Override

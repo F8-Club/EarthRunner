@@ -21,7 +21,7 @@ import android.util.Log;
 
 public class UpdateServerTask extends TimerTask {
     
-    private static final String HOST = "192.168.1.228"; //FIXME harcoded server location
+    private String host = "192.168.1.228"; 
     private static final int PORT = 8080;
     private static final String SERVER_PATH = "EarthRunnerServer/update";
     private static final String SCHEME = "http";
@@ -50,7 +50,7 @@ public class UpdateServerTask extends TimerTask {
         params.add(new BasicNameValuePair(PARAM_UUID,uuid));
         String query = URLEncodedUtils.format(params, HTTP.UTF_8);
         try {
-            URI uri = URIUtils.createURI(SCHEME, HOST, PORT, SERVER_PATH, query, null);
+            URI uri = URIUtils.createURI(SCHEME, service.getUuid(), PORT, SERVER_PATH, query, null);
             HttpGet httpGet = new HttpGet(uri);
             HttpResponse response = httpClient.execute(httpGet);
             response.getEntity().consumeContent();

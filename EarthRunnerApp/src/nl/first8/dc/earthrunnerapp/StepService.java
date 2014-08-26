@@ -14,12 +14,13 @@ import android.os.IBinder;
 
 public class StepService extends Service {
 
+    private static final long SERVER_UPDATE_INTERVAL = 1000L;
     private final IBinder mBinder = new LocalBinder();
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
     private Timer timer;
     private Random random = new Random();
-    private String uuid = "empty";
+    private String uuid = "empty"; //TODO for now this is actually IP
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -55,7 +56,7 @@ public class StepService extends Service {
                 SensorManager.SENSOR_DELAY_FASTEST);
         timer = new Timer("stepTimer", true);
         TimerTask task = new UpdateServerTask(this);
-        timer.scheduleAtFixedRate(task, 3000L, 1000L);
+        timer.scheduleAtFixedRate(task, 3000L, SERVER_UPDATE_INTERVAL);
     }
 
     @Override
