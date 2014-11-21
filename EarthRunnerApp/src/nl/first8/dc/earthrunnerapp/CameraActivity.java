@@ -39,6 +39,15 @@ public class CameraActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+    
+    
+
+    @Override
+    public void onBackPressed() {
+        Intent stepIntent = new Intent(this, MainActivity.class);
+        startActivity(stepIntent);
+        super.onBackPressed();
+    }
 
     public void onScan(View view) {
         IntentIntegrator scanIntent = new IntentIntegrator(this);
@@ -54,7 +63,7 @@ public class CameraActivity extends ActionBarActivity {
                     Toast.LENGTH_LONG).show();
             
             Intent stepIntent = new Intent(this, StepCounterActivity.class);
-            stepIntent.putExtra("uuid", scanContent);
+            stepIntent.putExtra(AppConstants.EXTRA_CAMERA_SCAN, scanContent);
             startActivity(stepIntent);
         }
     }

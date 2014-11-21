@@ -17,4 +17,14 @@
         android:onClick="openScanner"
         android:src="@drawable/ic_launcher" />
 
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageButton1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
+        android:onClick="openStepCounter"
+        android:text="TestSteps" />
+
 </RelativeLayout>

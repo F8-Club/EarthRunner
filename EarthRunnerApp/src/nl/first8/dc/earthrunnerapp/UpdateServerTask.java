@@ -39,18 +39,22 @@ public class UpdateServerTask extends TimerTask {
     @Override
     public void run() {
         float speed = service.getCurrentSpeed();
-        String uuid = service.getUuid();
+        String uuid = service.getServerConnectionString();
         updateServer(speed, uuid);
     }
 
 
     private void updateServer(float speed, String uuid) {
+        if (uuid == null) {
+            Log.d("UpdateServerTask", "No server is known, skipping update");
+            return;
+        }
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair(PARAM_SPEED, Float.valueOf(speed).toString()));
         params.add(new BasicNameValuePair(PARAM_UUID,uuid));
         String query = URLEncodedUtils.format(params, HTTP.UTF_8);
         try {
-            URI uri = URIUtils.createURI(SCHEME, service.getUuid(), PORT, SERVER_PATH, query, null);
+            URI uri = URIUtils.createURI(SCHEME, service.getServerConnectionString(), PORT, SERVER_PATH, query, null);
             HttpGet httpGet = new HttpGet(uri);
             HttpResponse response = httpClient.execute(httpGet);
             response.getEntity().consumeContent();
