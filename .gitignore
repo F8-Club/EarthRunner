@@ -1,6 +1,13 @@
 earth-runner-app/platforms/android/CordovaLib/ant-build/
 earth-runner-app/platforms/android/ant-build/
 earth-runner-server/.settings/
+earth-runner-server/.classpath
+earth-runner-app/.settings/
+earth-runner-app/.classpath
+EarthRunnerAppForGlass/.project
+EarthRunnerAppForGlass/.settings/
+EarthRunnerAppForGlass/.classpath
+
 
 # Default files to ignore for android projects (see https://github.com/github/gitignore/blob/master/Android.gitignore & https://help.github.com/articles/ignoring-files/)
 # Built application files
