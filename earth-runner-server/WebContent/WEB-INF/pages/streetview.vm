@@ -12,6 +12,7 @@
 		<style>
 #streetview {
 	margin-top: 400px;
+	width: 600px;
 }
 #streetview > img {
     margin-top: -400px;

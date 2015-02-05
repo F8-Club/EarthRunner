@@ -29,11 +29,11 @@ $(function() {
 	    var refreshTimeout = 1200; // refresh timeout
 	    var imageCrossfade = 1150; // refresh timeout
 
-	    var maxBufferSize = 50; // max frames to prefetch
-	    var buffer = new Array(maxBufferSize); // ring buffer with next few frames, keep one empty
+	    var maxBufferSize = 10; // max frames to prefetch
+	    var buffer = new Array(maxBufferSize); // ring buffer with next few frames, keep one empty. each buffer frame corresponds with a single latlng frame
 	    var bufferStart = 0; // start of ready ring buffer frames
 	    var bufferEnd = 0;  // end of ready ring buffer frames
-	    var traveled = 0; // distance traveled in decimeters
+	    var traveled = 0; // distance traveled in latlng indices
 	    
 	    var imageToggle = 0; // indicates which image is on top for crossfading
 	    
@@ -165,29 +165,46 @@ $(function() {
 	    		return;
 	    	}
 
+	    	// get the latlng for at the end of the buffer
+
 	    	
-	    	var nextFrame = next( traveled + (bufferSize()));
+//	    	var previousTraveled = (buffer[bufferEnd]? buffer[bufferEnd].traveled : 0)
+	    	
+	    	var previousTraveled;
+	    	if (buffer[bufferEnd]) {
+	    		previousTraveled = buffer[bufferEnd].traveled;
+	    	} else {
+	    		previousTraveled = 0;
+	    		log.append($('<li>', { text: "buffer at " + bufferEnd + " is undefined so assuming 0 for previousTraveled" }));	    	
+	    	}
+	    	var latlngIndex = previousTraveled + 1;
+	    	if (latlngIndex>=latlngs.length) latlngIndex = latlngIndex - latlngs.length;
+	    	
 	    	bufferEnd = bufferEnd + 1;
 	    	if (bufferEnd>=maxBufferSize) { bufferEnd = bufferEnd - maxBufferSize; };
 	    	
-	    	loadFrameInBuffer(nextFrame, bufferEnd);
+	    	log.append($('<li>', { text: "Preloading buffer "+bufferEnd+" for latLngIndex: " + latlngIndex + " based on previousTraveled: " + previousTraveled }));	    	
+	    	
+	    	loadFrameInBuffer(latlngIndex, bufferEnd);
 	    }
 	    
-	    function loadFrameInBuffer(fi, bi) {
+	    function loadFrameInBuffer(li, bi) {
 	    	
 	    	var previousBi = bi-1;
 	    	if (previousBi<0) previousBi += bufferSize;
 	    	
 	    	buffer[bi] = {};
-	    	buffer[bi].latlng = latlngs[fi];
+	    	buffer[bi].latlng = latlngs[li];
+	    	buffer[bi].traveled = li;
 	    	
 //	    	alert("calculating heading etc: " + previousBi + " to " + bi );
 	    	if (buffer[previousBi]) {
+//		    	log.append($('<li>', { text: "Loading buffer: " + bi + " with latlngIndex: " + li + " with previous bi: " + previousBi + ", prev latlngIndex: " + buffer[previousBi].latlng}));	    	
 	    		buffer[bi].heading = google.maps.geometry.spherical.computeHeading(buffer[previousBi].latlng,buffer[bi].latlng); 
 	    		buffer[bi].previousLatlng = buffer[previousBi].latlng;
 	    		buffer[bi].distance = google.maps.geometry.spherical.computeDistanceBetween (buffer[previousBi].latlng,buffer[bi].latlng);
-	    		buffer[bi].traveled = buffer[previousBi].traveled + buffer[bi].distance;
 	    	} else {
+//		    	log.append($('<li>', { text: "Loading buffer: " + bi + " with latlngIndex: " + li + " without previous bi"}));	    	
 //		    	alert("previous bi was empty" );
 	    		buffer[bi].heading = 0; 
 	    		buffer[bi].previousLatlng = 'x';
@@ -201,7 +218,7 @@ $(function() {
 		    	bufferMarker2.setPosition(buffer[bi].latlng);
 	    		fillBuffer();
 	    	};
-	    	buffer[bi].image.src = streetviewUrl(latlngs[fi].lat(), latlngs[fi].lng(), buffer[bi].heading);
+	    	buffer[bi].image.src = streetviewUrl(latlngs[li].lat(), latlngs[li].lng(), buffer[bi].heading);
 	    	
 	    }
 	    
@@ -269,8 +286,8 @@ $(function() {
 	    	traveled = next(traveled);
 	    	
 	    	if (bufferSize()>1) {
-		    	bufferStart = nextBuffer(bufferStart);
-		    	
+		    	bufferStart = findBestBuffer(traveled);
+
 		    	if (buffer[bufferStart]) {
 		    		updateStatus();
 		    	}
@@ -332,6 +349,17 @@ $(function() {
 	    	if (j>=maxBufferSize) j = j - maxBufferSize;
 	    	return j;	
 	    }
+	    
+	    function findBestBuffer(traveled) {
+	    	for (var i=0; i<bufferSize(); i++) {
+	    		var bi = nextBuffer(bufferStart + i);
+	    		
+	    		if (buffer[bi].traveled>traveled) {
+	    			return bi;
+	    		}
+	    	}
+	    	
+	    }
 
 	    function distanceToNext(i) {
 	    	var j = next(i);
@@ -352,6 +380,7 @@ $(function() {
 			debug +="<img src=\""+buffer[p].image.src+"\">";
 			debug +="<br>coord:" + buffer[p].latlng;
 			debug +="<br>prev coord:" + buffer[p].previousLatlng;
+			debug +="<br>traveled:" + buffer[p].traveled;
 			debug +="<br>heading:" + buffer[p].heading;
 			debug +="<br>buffer index:" + p;
 			debug +="<br>url:" + buffer[p].image.src;
