@@ -25,8 +25,9 @@ $(function() {
 	    var defaultSpeed = 10;
 	    
 	    var bufferTimeout = 50; // time to wait before starting buffer after being full
-	    var refreshTimeout = defaultRefreshTime; // refresh timeout
-	    var imageCrossfade = 200; // refresh timeout
+
+	    var refreshTimeout = 1200; // refresh timeout
+	    var imageCrossfade = 1150; // refresh timeout
 
 	    var maxBufferSize = 50; // max frames to prefetch
 	    var buffer = new Array(maxBufferSize); // ring buffer with next few frames, keep one empty
@@ -293,14 +294,14 @@ $(function() {
 //	    	// next image below that
 //    		next.css('z-index',2);
 //    		// show next image under active image
-    		next.attr('src',buffer[bufferStart].image.src);
+    		next.attr('src',buffer[bufferStart].image.src).show();
 //    		
 //    		// fade out active image
-//    		active.fadeOut(imageCrossfade,function(){
-//    			  // move active image to bottom
-//	    		  active.css('z-index',1);
-//	    	      next.css('z-index',3);
-//	    	});
+    		active.fadeOut(imageCrossfade,function(){
+    			  // move active image to bottom
+	    		  active.css('z-index',1).hide();
+	    	      next.css('z-index',3).show();
+	    	});
     		
     		var r1 = "distance from prev frame: <b>" + buffer[bufferStart].distance + "</b> m ";
     		var r2 = "<br>traveled in buffer: <b>" + buffer[bufferStart].traveled + "</b> m ";
