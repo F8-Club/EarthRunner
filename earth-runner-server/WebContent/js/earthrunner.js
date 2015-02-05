@@ -16,24 +16,26 @@ $(function() {
 	    var subSocket;
 	    var transport = 'websocket';
 	    
-    	var coordinates = routeString.split(" ");
-	    var latlngs = [];
+	     
+    	var coordinates = routeString.split(" "); // the original coordinates of the route
+	    var latlngs = []; // normalized latlngs based on the route, fixed distance. images are preloaded on same index points in the 'buffer'.
 	    var speed = 1; // in m/s
-	    var granularity = 5; // in meter/frame
+	    var granularity = 7; // in meter/frame
 	    
-	    var defaultRefreshTime = 300;
+	    var defaultRefreshTime = 250;
 	    var defaultSpeed = 10;
 	    
 	    var bufferTimeout = 50; // time to wait before starting buffer after being full
 
-	    var refreshTimeout = 1200; // refresh timeout
-	    var imageCrossfade = 1150; // refresh timeout
+	    var refreshTimeout = defaultRefreshTime; // refresh timeout for updating the screen
+	    var imageCrossfade = defaultRefreshTime * 0.9; // cross fade time for updating the screen
 
-	    var maxBufferSize = 10; // max frames to prefetch
+	    var maxBufferSize = 100; // max frames to prefetch
 	    var buffer = new Array(maxBufferSize); // ring buffer with next few frames, keep one empty. each buffer frame corresponds with a single latlng frame
 	    var bufferStart = 0; // start of ready ring buffer frames
 	    var bufferEnd = 0;  // end of ready ring buffer frames
 	    var traveled = 0; // distance traveled in latlng indices
+	    var currentBuffer = 0; // the buffer index currently being displayed (soon to be bufferStart)
 	    
 	    var imageToggle = 0; // indicates which image is on top for crossfading
 	    
@@ -78,7 +80,7 @@ $(function() {
 	    
 
 	    request.onOpen = function(response) {
-	        log.append($('<li>', { text: 'Atmosphere connected using ' + response.transport }));
+	        log.append($('<li>', { text: '<server> Atmosphere connected using ' + response.transport }));
 	        transport = response.transport;
 	        // Carry the UUID. This is required if you want to call subscribe(request) again.
 	        request.uuid = response.request.uuid;
@@ -87,7 +89,7 @@ $(function() {
 	    };
 
 	    request.onClientTimeout = function(r) {
-	        log.append($('<li>', { text: 'Client closed the connection after a timeout. Reconnecting in ' + request.reconnectInterval }));
+	        log.append($('<li>', { text: '<server> Client closed the connection after a timeout. Reconnecting in ' + request.reconnectInterval }));
 	        subSocket.push(atmosphere.util.stringifyJSON({ message: 'is inactive and closed the connection. Will reconnect in ' + request.reconnectInterval }));
 	        setTimeout(function (){
 	            subSocket = socket.subscribe(request);
@@ -95,7 +97,7 @@ $(function() {
 	    };
 
 	    request.onReopen = function(response) {
-	        log.html($('<li>', { text: 'Atmosphere re-connected using ' + response.transport }));
+	        log.html($('<li>', { text: '<server> Atmosphere re-connected using ' + response.transport }));
 	    };
 
 	    // For demonstration of how you can customize the fallbackTransport using the onTransportFailure function
@@ -132,19 +134,19 @@ $(function() {
 	    };
 
 	    request.onClose = function(response) {
-	        log.append($('<li>', { text: 'Server closed the connection after a timeout' }));
+	        log.append($('<li>', { text: '<server> Server closed the connection after a timeout' }));
 	        if (subSocket) {
 	            subSocket.push(atmosphere.util.stringifyJSON({ message: 'disconnecting' }));
 	        }
 	    };
 
 	    request.onError = function(response) {
-	        log.append($('<li>', { text: 'Sorry, but there\'s some problem with your '
+	        log.append($('<li>', { text: '<server> Sorry, but there\'s some problem with your '
 	            + 'socket or the server is down' }));
 	    };
 
 	    request.onReconnect = function(request, response) {
-	        log.append($('<li>', { text: 'Connection lost, trying to reconnect. Trying to reconnect ' + request.reconnectInterval}));
+	        log.append($('<li>', { text: '<server> Connection lost, trying to reconnect. Trying to reconnect ' + request.reconnectInterval}));
 	    };
 
 	    subSocket = socket.subscribe(request);
@@ -159,37 +161,44 @@ $(function() {
 	    }
 	    
 	    function fillBuffer() {
+	    	bufferStart = currentBuffer;
+	    	
 	    	if (bufferSize()>=maxBufferSize-1) {
 	    		// wait for restarting filling buffer
 	    		setTimeout(fillBuffer, bufferTimeout);
 	    		return;
 	    	}
 
+	    	if (buffer[bufferStart] && buffer[bufferEnd]) {
+	    		log.append($('<li>', { text: "<buffer> has space so updating. Runs from bi " + bufferStart + "(fi: " + buffer[bufferStart].traveled + ") to bi " + bufferEnd + "(fi: " + buffer[bufferEnd].traveled +")" }));	    	
+	    	}
+	    	
 	    	// get the latlng for at the end of the buffer
-
-	    	
-//	    	var previousTraveled = (buffer[bufferEnd]? buffer[bufferEnd].traveled : 0)
-	    	
 	    	var previousTraveled;
 	    	if (buffer[bufferEnd]) {
 	    		previousTraveled = buffer[bufferEnd].traveled;
+	    		log.append($('<li>', { text: "<buffer> buffer at " + bufferEnd + " has traveled " + previousTraveled }));	    	
 	    	} else {
 	    		previousTraveled = 0;
-	    		log.append($('<li>', { text: "buffer at " + bufferEnd + " is undefined so assuming 0 for previousTraveled" }));	    	
+	    		log.append($('<li>', { text: "<buffer> buffer at " + bufferEnd + " is undefined so assuming 0 for previousTraveled" }));	    	
 	    	}
 	    	var latlngIndex = previousTraveled + 1;
 	    	if (latlngIndex>=latlngs.length) latlngIndex = latlngIndex - latlngs.length;
-	    	
+
+	    	// increase the buffer end (or loop around)
 	    	bufferEnd = bufferEnd + 1;
 	    	if (bufferEnd>=maxBufferSize) { bufferEnd = bufferEnd - maxBufferSize; };
 	    	
-	    	log.append($('<li>', { text: "Preloading buffer "+bufferEnd+" for latLngIndex: " + latlngIndex + " based on previousTraveled: " + previousTraveled }));	    	
+//	    	log.append($('<li>', { text: "Preloading buffer "+bufferEnd+" for latLngIndex: " + latlngIndex + " based on previousTraveled: " + previousTraveled }));	    	
 	    	
 	    	loadFrameInBuffer(latlngIndex, bufferEnd);
 	    }
 	    
+	    // li is the latlng index to load, bi is the position in the buffer to load it to
 	    function loadFrameInBuffer(li, bi) {
 	    	
+	    	
+	    	// determine previous buffer index so we can use it to calculate the heading
 	    	var previousBi = bi-1;
 	    	if (previousBi<0) previousBi += bufferSize;
 	    	
@@ -197,19 +206,17 @@ $(function() {
 	    	buffer[bi].latlng = latlngs[li];
 	    	buffer[bi].traveled = li;
 	    	
-//	    	alert("calculating heading etc: " + previousBi + " to " + bi );
+	    	log.append($('<li>', { text: "<buffer> calculating heading etc: " + previousBi + " to " + bi}));	    	
 	    	if (buffer[previousBi]) {
-//		    	log.append($('<li>', { text: "Loading buffer: " + bi + " with latlngIndex: " + li + " with previous bi: " + previousBi + ", prev latlngIndex: " + buffer[previousBi].latlng}));	    	
+		    	log.append($('<li>', { text: "<buffer> Loading buffer: " + bi + " with latlngIndex: " + li + " with previous bi: " + previousBi + ", prev latlngIndex: " + buffer[previousBi].latlng}));	    	
 	    		buffer[bi].heading = google.maps.geometry.spherical.computeHeading(buffer[previousBi].latlng,buffer[bi].latlng); 
 	    		buffer[bi].previousLatlng = buffer[previousBi].latlng;
 	    		buffer[bi].distance = google.maps.geometry.spherical.computeDistanceBetween (buffer[previousBi].latlng,buffer[bi].latlng);
 	    	} else {
-//		    	log.append($('<li>', { text: "Loading buffer: " + bi + " with latlngIndex: " + li + " without previous bi"}));	    	
-//		    	alert("previous bi was empty" );
+		    	log.append($('<li>', { text: "<buffer> Loading buffer: " + bi + " with latlngIndex: " + li + " without previous bi"}));	    	
 	    		buffer[bi].heading = 0; 
 	    		buffer[bi].previousLatlng = 'x';
 	    		buffer[bi].distance = 0;
-	    		buffer[bi].traveled = 0;
 	    	}
 	    	
 	    	buffer[bi].image = new Image();
@@ -239,7 +246,7 @@ $(function() {
 	    			p++;
 	    		}
 	    	}
-	    	log.append($('<li>', { text: "Smoothed route to " + points.length + " points"}));	    	
+	    	log.append($('<li>', { text: "<load> Smoothed route to " + points.length + " points"}));	    	
 	    	
 	    	return points;
 	    }
@@ -265,7 +272,7 @@ $(function() {
 	    			result.push(newPoint);
 	    		}
 	    	}
-	    	log.append($('<li>', { text: "Generated route of " + result.length + " points"}));	    	
+	    	log.append($('<li>', { text: "<load> Generated route of " + result.length + " points"}));	    	
 	    	return result;
 	    }
 	    
@@ -275,7 +282,7 @@ $(function() {
 	    
 	    function waitForBuffer() {
 	    	if (bufferSize()>maxBufferSize*0.8) {
-	    	    log.append($('<li>', { text: "buffer preloading done"}));	    	
+	    	    log.append($('<li>', { text: "<gui> buffer preloading done"}));	    	
 	    		refresh();
 	    	} else {
 	    		setTimeout(waitForBuffer,100);
@@ -286,20 +293,57 @@ $(function() {
 	    	traveled = next(traveled);
 	    	
 	    	if (bufferSize()>1) {
-		    	bufferStart = findBestBuffer(traveled);
+		    	var bi = findBestBuffer(traveled);
 
-		    	if (buffer[bufferStart]) {
-		    		updateStatus();
+		    	log.append($('<li>', { text: "<gui> Rendering bi " + bi}));	    	
+
+		    	if (buffer[bi]) {
+		    		updateStatus(bi);
 		    	}
+		    	
+		    	currentBuffer = bi;
 	    	}
 	    	
 	    	setTimeout( refresh, refreshTimeout);  
 	    }
 
-	    function updateStatus() {
-	    	marker.setPosition(buffer[bufferStart].latlng);
-	    	bufferMarker1.setPosition(buffer[bufferStart].latlng);
+	    function updateStatus(bi) {
+	    	marker.setPosition(buffer[bi].latlng);
+	    	if (buffer[bufferStart]) {
+	    		bufferMarker1.setPosition(buffer[bufferStart].latlng);
+	    	}
 	    	bufferMarker2.setPosition(buffer[bufferEnd].latlng);
+
+	    	showImage(bi);
+    		
+    		var r1 = "distance from prev frame: <b>" + buffer[bi].distance + "</b> m ";
+    		var r2 = "<br>traveled in buffer: <b>" + buffer[bi].traveled + "</b> m ";
+    		var r3 = "<br>coord: <b>" + buffer[bi].latlng + "</b>" ;
+    		var r4 = "<br>heading: <b>" + buffer[bi].heading + "</b>" ;
+    		var r5 = "<br>speed: <b>" + speed + "</b>";
+    		var r6 = "<br>buffer size: <b>" + bufferSize().toString() + "(" + (bufferSize()/maxBufferSize*100) + "%)</b>";
+    		var r7 = "<br>buffer idx: <b>" + bi.toString() + "</b>";
+    		var r8 = "<br>traveled: <b>" + traveled.toString() + "</b>";
+    		$("#distance").html( r1+r2+r3+r4+r5+r6+r7+r8);
+
+	    }
+	    function showImage(bi) {
+//	    	crossFadeImage(bi);
+	    	flipImage(bi);
+	    }
+	    
+	    function flipImage(bi) {
+	    	log.append($('<li>', { text: "<gui> Showing image in bi " + bi}));	    	
+	    	var active = $("#streetviewImg0");
+	    	active.attr('src',buffer[bi].image.src);
+	    	active.css('opacity',1);
+	    	active.css('z-index',100);
+	    }
+	    
+	    function crossFadeImage(bi) {
+
+	    	log.append($('<li>', { text: "<gui> Showing image in bi " + bi}));	    	
+
 	    	
 	    	var active = $("#streetviewImg" + (imageToggle));
 	    	imageToggle +=1;
@@ -311,7 +355,7 @@ $(function() {
 //	    	// next image below that
 //    		next.css('z-index',2);
 //    		// show next image under active image
-    		next.attr('src',buffer[bufferStart].image.src).show();
+    		next.attr('src',buffer[bi].image.src).show();
 //    		
 //    		// fade out active image
     		active.fadeOut(imageCrossfade,function(){
@@ -319,18 +363,9 @@ $(function() {
 	    		  active.css('z-index',1).hide();
 	    	      next.css('z-index',3).show();
 	    	});
-    		
-    		var r1 = "distance from prev frame: <b>" + buffer[bufferStart].distance + "</b> m ";
-    		var r2 = "<br>traveled in buffer: <b>" + buffer[bufferStart].traveled + "</b> m ";
-    		var r3 = "<br>coord: <b>" + buffer[bufferStart].latlng + "</b>" ;
-    		var r4 = "<br>heading: <b>" + buffer[bufferStart].heading + "</b>" ;
-    		var r5 = "<br>speed: <b>" + speed + "</b>";
-    		var r6 = "<br>buffer size: <b>" + bufferSize().toString() + "(" + (bufferSize()/maxBufferSize*100) + "%)</b>";
-    		var r7 = "<br>buffer idx: <b>" + bufferStart.toString() + "</b>";
-    		var r8 = "<br>traveled: <b>" + traveled.toString() + "</b>";
-    		$("#distance").html( r1+r2+r3+r4+r5+r6+r7+r8);
 
 	    }
+	    
 	    function latlngRaw(i) {
 	    	var coord = coordinates[i].split(",");
 	    	var lng = coord[0];
@@ -351,14 +386,13 @@ $(function() {
 	    }
 	    
 	    function findBestBuffer(traveled) {
+	    	// TODO calculate directly since buffers are now aligned with latlngs
 	    	for (var i=0; i<bufferSize(); i++) {
 	    		var bi = nextBuffer(bufferStart + i);
-	    		
 	    		if (buffer[bi].traveled>traveled) {
 	    			return bi;
 	    		}
 	    	}
-	    	
 	    }
 
 	    function distanceToNext(i) {
@@ -410,10 +444,10 @@ $(function() {
 	    	$("#debug").html(debug);
 	    });
 	    
-	    log.append($('<li>', { text: 'Connecting' }));
+	    log.append($('<li>', { text: '<server> Connecting' }));
 	    latlngs=interpolate();
 //	    latlngs=smoothe(latlngs);
-	    log.append($('<li>', { text: "Preloading buffer"}));	    	
+	    log.append($('<li>', { text: "<gui> Preloading buffer"}));	    	
 	    fillBuffer();
 	    waitForBuffer();
 	
